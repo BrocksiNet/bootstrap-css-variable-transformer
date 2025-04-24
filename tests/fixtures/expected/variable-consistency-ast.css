@@ -1,0 +1,32 @@
+:root {
+  --bs-light: #f9f9f9;
+  --bs-dark: #212529;
+  --bs-primary: var(--theme-primary);
+  --bs-secondary: var(--theme-secondary);
+}
+
+.light-panel {
+  color: #212529;
+  background-color: #f9f9f9;
+  border: 1px solid #00000020;
+}
+
+.primary-button {
+  color: #fff;
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.secondary-button {
+  color: #fff;
+  background-color: #6c757d;
+  border-color: #6c757d;
+}
+
+.also-light-panel {
+  background-color: var(--bs-light);
+}
+
+.also-primary-button {
+  background-color: var(--bs-primary);
+}

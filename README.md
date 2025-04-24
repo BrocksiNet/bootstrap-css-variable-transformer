@@ -1,0 +1,326 @@
+# Bootstrap CSS Variable Transformer
+
+Transforms compiled Bootstrap CSS (or any CSS) to use CSS variables based on a JSON configuration file. This allows for easier theming and consistency, especially when working with frameworks or design systems that rely on CSS variables.
+
+## Features
+
+* Replaces hardcoded values (like hex codes) with corresponding CSS variables.
+* Replaces existing CSS variable references (`var(--original-var)`) with mapped variables (`var(--theme-var)`).
+* Updates CSS variable declarations (`--original-var: value`) to use mapped variables (`--original-var: var(--theme-var)`).
+* Supports default mappings and override mappings from separate configuration files.
+* Offers two transformation methods: AST (using LightningCSS, recommended) and Regex.
+* Generates a companion `.vars.css` file containing placeholder declarations for all *target* theme variables used during the transformation (New!).
+
+## Usage
+
+```bash
+npx bootstrap-css-variables-transformer -i input.css -o output.css -c config.json [--overrides overrides.json] [-m ast|regex]
+```
+
+Or install globally/locally:
+
+```bash
+npm install -g bootstrap-css-variables-transformer
+# or
+npm install --save-dev bootstrap-css-variables-transformer
+```
+
+Then run:
+
+```bash
+bootstrap-css-variables-transformer -i path/to/bootstrap.css -o path/to/themed-bootstrap.css -c path/to/theme-mapping.json
+```
+
+### Options
+
+* `-i, --input <inputFile>`: (Required) Path to the input CSS file.
+* `-o, --output <outputFile>`: (Required) Path to write the transformed CSS file.
+* `-c, --config <configFile>`: (Required) Path to the main JSON configuration file (base mapping).
+* `--overrides <overridesFile>`: (Optional) Path to a JSON configuration file for overrides. Mappings in this file take precedence over the base configuration.
+* `-m, --method <method>`: (Optional) Transformation method (`ast` or `regex`). Defaults to `ast`.
+
+## Configuration Files (`config.json`, `overrides.json`)
+
+The configuration files define the mapping between values/variables in the input CSS and the desired theme variables.
+
+* **Base Configuration (`-c <configFile>`):** This file provides the primary set of mappings.
+* **Override Configuration (`--overrides <overridesFile>`):** This optional file allows you to specify mappings that take precedence over the base configuration.
+
+The tool merges these two configurations. If a key (the value or variable to find) exists in both the base and override files, the value (the target theme variable) from the override file is used.
+
+**Structure:**
+
+Each configuration file should be a JSON object where keys are the literal values (e.g., hex codes like `#0d6efd`) or existing variable names (e.g., `--bs-primary`) to find in the input CSS, and values are the corresponding theme variable names (e.g., `--theme-primary`) to replace them with.
+
+**Example Base (`theme-mapping.json`):**
+
+```json
+{
+  "#0d6efd": "--theme-primary",
+  "--bs-primary": "--theme-primary",
+  "#6c757d": "--theme-secondary",
+  "--bs-secondary": "--theme-secondary",
+  "#198754": "--theme-success",
+  "--bs-success": "--theme-success",
+  "--bs-body-color": "--theme-text-default"
+}
+```
+
+**Example Override (`theme-overrides.json`):**
+
+```json
+{
+  // Override the primary color specifically for buttons
+  "--bs-btn-bg": "--theme-button-primary-bg",
+  "--bs-btn-color": "--theme-button-primary-text",
+  // Override the default text color globally
+  "--bs-body-color": "--theme-text-override"
+}
+```
+
+When running with `-c theme-mapping.json --overrides theme-overrides.json`, the final effective mapping for `--bs-btn-bg` would be `--theme-button-primary-bg`, and for `--bs-body-color` it would be `--theme-text-override`. Other mappings from `theme-mapping.json` would remain unchanged.
+
+## Generated Variables File (`<output-name>.vars.css`)
+
+When the transformation process replaces values or variables in your input CSS with *target* theme variables (like `--theme-primary` in the example above), the tool automatically generates a companion CSS file.
+
+* **Naming:** If your output file is `output.css`, the variables file will be named `output.vars.css` and placed in the same directory.
+* **Content:** This file contains empty declarations for all the unique target variables found in your mapping values. Example (`output.vars.css` based on the mapping above):
+
+    ```css
+    :root {
+      --theme-primary: ;
+      --theme-secondary: ;
+      --theme-success: ;
+      --theme-button-text: ;
+      --theme-button-bg: ;
+    }
+    ```
+
+* **Import:** The main transformed output file (`output.css`) will automatically have an `@import url('./output.vars.css');` rule added at the top.
+* **Purpose:**
+  * Provides a clear list/template of the CSS variables your transformed CSS expects.
+  * Acts as a fallback. If you forget to define `--theme-primary` in your actual theme, the browser sees it's declared (even if empty) in the imported file, preventing errors related to undefined variables. You can then easily provide values by defining these variables later in the CSS cascade (e.g., in your main theme stylesheet).
+
+## Development
+
+* Clone the repository.
+* Install dependencies: `npm install`
+* Build: `npm run build`
+* Test: `npm run test` (or `npm run test -- --coverage` for coverage report)
+* Lint: `npm run lint`
+* Validate Output CSS: `npm run validate:css` (Checks `output/all.css` for syntax validity using `lightningcss`)
+* Run CLI locally: `node dist/bin/cli.js --help`
+
+## TODO
+
+* Read version from `package.json` in CLI.
+* Improve AST transformation to handle literal value replacements and variable replacements within properties/functions, not just in declarations.
+* Add more comprehensive tests, especially for edge cases and the AST method.
+
+## Detailed TODOs
+
+* [x] Set up project structure and package.json
+* [x] Create CLI interface with command-line arguments
+* [x] Implement mapping configuration loader
+* [x] Build transformer functionality
+  * Regex-based implementation:
+    * [x] Process literal value replacements (e.g., #fff -> var(--theme-color))
+    * [x] Process variable references (e.g., var(--bs-color) -> var(--theme-color))
+    * [x] Process variable declarations (e.g., --bs-color: #fff -> --bs-color: var(--theme-color))
+  * AST-based implementation:
+    * [x] Create visitor for CSS custom property (DashedIdent) transformation
+    * [ ] Add visitor for color values in properties
+    * [ ] Add visitor for variable references (var() functions)
+    * [ ] Handle other property types (lengths, gradients, etc.)
+* [ ] Improve variable consistency:
+  * [x] Detect defined Bootstrap variables and their values (regex implementation)
+  * [x] Match hardcoded values to potential variable equivalents (regex implementation)
+  * [x] Replace hardcoded values with references to appropriate Bootstrap variables (regex implementation)
+  * [ ] Implement variable consistency in AST transformation
+* [x] Support for basic inheritance and overriding configurations
+* [x] Implement file I/O handling
+* [x] Write unit tests
+  * [x] Set up test fixtures structure
+  * [x] Add transformer tests for both methods
+  * [x] Add variable consistency tests
+  * [ ] Add more comprehensive test suite
+* [x] Add documentation and examples (Initial Version)
+* [ ] Create GitHub Actions workflow for CI/CD
+* [ ] Generate default mappings:
+  * [ ] Create tool to extract Bootstrap variables from CSS files (Consider if needed or use external tool)
+  * [ ] Add command for generating default-mapping.json file from Bootstrap CSS (Consider if needed)
+
+## Background
+
+Bootstrap 5 doesn't consistently use CSS variables throughout its components, making theming difficult. While they've implemented some root CSS variables, many component-specific styles don't reference these variables or use hardcoded values, creating a disconnect after compilation.
+
+This tool uses LightningCSS to parse and transform the compiled CSS, replacing hardcoded color values with CSS variables and establishing proper variable relationships for easy theming.
+
+### Inconsistent Variable Usage
+
+A common issue in Bootstrap CSS is that defined variables often aren't used consistently:
+
+1. Some CSS variables are defined but never referenced (e.g., `--bs-light: #f9f9f9;`)
+2. The same hardcoded values appear in multiple places where the variable should be used (e.g., `color: #f9f9f9;` instead of `color: var(--bs-light);`)
+
+Our transformer addresses this by:
+
+* Identifying hardcoded values that match defined Bootstrap variables
+* Replacing these values with references to the appropriate variables
+* Then transforming those Bootstrap variables to theme variables
+
+This creates a more consistent variable structure and improves theme customization.
+
+## How It Works
+
+This tool uses two approaches to transform Bootstrap CSS:
+
+### AST-based Transformation (Default)
+
+The AST-based approach uses LightningCSS to parse the CSS into an Abstract Syntax Tree, modify the tree directly, and then generate CSS from the modified tree:
+
+1. Parse command-line arguments (input/output files, config path, method).
+2. Load and validate the mapping configuration file using Zod.
+3. Parse the input CSS file using LightningCSS into an AST.
+4. Apply transformation visitors to the AST:
+   * **Current implementation**: Transforms the *value* of CSS custom property *declarations* (e.g., `--bs-primary: value;`) based on the mapping configuration. It can map a declaration to another variable (`--bs-primary: var(--theme-primary);`) or to a literal value (`--bs-primary: #ffffff;`), attempting to parse simple literals like colors, dimensions, and numbers.
+   * **Planned**: Implement visitors to replace hardcoded literal values (like `#0d6efd`) within standard properties (like `background-color`) with corresponding theme variables.
+   * **Planned**: Implement visitors to update `var()` function calls within standard properties (e.g., `color: var(--bs-primary);`) to use the mapped theme variables (`color: var(--theme-primary);`).
+   * **Planned**: Implement logic to identify hardcoded values that match defined Bootstrap variables and replace them with variable references *before* applying the theme mapping (variable consistency feature).
+5. Generate the transformed CSS from the modified AST.
+
+If the AST transformation encounters issues, it automatically falls back to the regex-based method.
+
+### Regex-based Transformation
+
+The regex-based approach uses string pattern matching and regular expressions for transformations:
+
+1. Process the CSS as a string, combining defaultMapping and overrides.
+2. Extract all defined Bootstrap variables and build a value-to-variable mapping.
+3. Process literal value replacements, with two sub-steps:
+   * Replace hardcoded values that match Bootstrap variables with references to those variables.
+   * Replace hardcoded values and Bootstrap variables with theme variables based on the config.
+4. Process variable references (e.g., `var(--bs-btn-color)` → `var(--theme-btn-color)`).
+5. Process variable declarations (e.g., `--bs-btn-color: #fff` → `--bs-btn-color: var(--theme-btn-color)`).
+
+This approach is fully implemented for the basic transformations and variable consistency improvements.
+
+### Example Transformation
+
+**Basic Variable Mapping:**
+
+Input:
+
+```css
+.btn-primary {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: #0042a0;
+}
+```
+
+Output:
+
+```css
+.btn-primary {
+  --bs-btn-color: var(--theme-button-text);
+  --bs-btn-bg: var(--theme-primary);
+}
+```
+
+**Improved Variable Consistency:**
+
+Input:
+
+```css
+:root {
+  --bs-light: #f9f9f9;
+}
+
+.light-panel {
+  background-color: #f9f9f9;
+  color: #212529;
+}
+```
+
+Output after bootstrap variable consistency:
+
+```css
+:root {
+  --bs-light: #f9f9f9;
+}
+
+.light-panel {
+  background-color: var(--bs-light);
+  color: #212529;
+}
+```
+
+Final output after theme transformation:
+
+```css
+:root {
+  --bs-light: var(--theme-light);
+}
+
+.light-panel {
+  background-color: var(--bs-light);
+  color: var(--theme-text);
+}
+```
+
+## Project Structure
+
+The project follows this structure:
+
+```shell
+bootstrap-css-variables-transformer/
+├── src/
+│   ├── bin/
+│   │   ├── cli.ts               # Main CLI entry point
+│   │   └── extract-variables.ts # Script to extract vars
+│   ├── lib/
+│   │   ├── transformer.ts       # Main transformation logic (AST & Regex)
+│   │   └── mapping-loader.ts    # Loads and processes mapping files
+│   └── schemas/
+│       └── configSchema.ts      # Zod schema for configuration validation
+├── dist/                        # Compiled JavaScript output
+├── input/                       # Example input CSS files
+├── output/                      # Example output transformed CSS
+├── config/                      # Example configuration files
+├── scripts/                     # Helper scripts
+├── tests/
+│   ├── fixtures/                # Test input/output files
+│   ├── bin/
+│   │   ├── cli.test.ts
+│   │   └── extract-variables.test.ts # Tests for extract script
+│   └── lib/
+│       ├── mapping-loader.test.ts
+│       └── transformer.test.ts
+├── .gitignore
+├── biome.json                   # Biome linter/formatter config
+├── config.json                  # Root config (likely example/test)
+├── .markdownlint.json           # Markdown linting config
+├── package.json
+├── package-lock.json
+├── README.md
+├── tsconfig.json                # TypeScript configuration
+└── vitest.config.ts             # Vitest configuration
+```
+
+## References
+
+* [LightningCSS - How to Transform a DashedIdent value](https://www.brocksi.net/blog/lightningcss-how-to-transform-a-dashedident/) - Blog post explaining how to use LightningCSS visitors to transform CSS variable values.
+* [LightningCSS AST Viewer](https://lightningcss-ast-viewer.vercel.app/)
+
+## Disclaimer
+
+This code was generated with AI.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+MIT

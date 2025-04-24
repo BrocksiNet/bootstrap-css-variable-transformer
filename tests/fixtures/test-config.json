@@ -1,0 +1,14 @@
+{
+  "defaultMapping": {
+    "--bs-blue": "--theme-primary",
+    "--bs-primary": "--theme-primary",
+    "#0d6efd": "--theme-primary",
+    "--bs-secondary": "--theme-secondary",
+    "#212529": "--theme-text"
+  },
+  "overrides": {
+    "--bs-btn-color": "--theme-button-text",
+    "--bs-btn-bg": "--theme-button-bg",
+    "--bs-alert-color": "--theme-alert-text"
+  }
+}

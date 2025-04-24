@@ -1,0 +1,28 @@
+{
+  "defaultMapping": {
+    "--bs-primary": "--theme-primary",
+    "--bs-secondary": "--theme-secondary",
+    "--bs-success": "--theme-success",
+    "--bs-danger": "--theme-danger",
+    "--bs-white": "--theme-white",
+    "--bs-black": "--theme-black",
+    "--bs-body-font-family": "--theme-font-family",
+    "--bs-body-font-size": "--theme-font-size",
+    "#fff": "--theme-white",
+    "#000": "--theme-black",
+    "#212529": "--theme-text",
+    "#0b5ed7": "--theme-primary-dark",
+    "#0a58ca": "--theme-primary-darker"
+  },
+  "overrides": {
+    "--bs-btn-color": "--theme-button-text",
+    "--bs-btn-bg": "--theme-button-bg",
+    "--bs-btn-border-color": "--theme-button-border",
+    "--bs-btn-hover-color": "--theme-button-hover-text",
+    "--bs-btn-hover-bg": "--theme-button-hover-bg",
+    "--bs-btn-hover-border-color": "--theme-button-hover-border",
+    "--bs-alert-color": "--theme-alert-text",
+    "--bs-alert-bg": "--theme-alert-bg",
+    "--bs-alert-border-color": "--theme-alert-border"
+  }
+}

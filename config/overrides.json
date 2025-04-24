@@ -1,0 +1,22 @@
+{
+  "overrides": {
+    "--bs-primary": "--theme-primary",
+    "--bs-secondary": "--theme-secondary",
+    "--bs-success": "--theme-success",
+    "--bs-info": "--theme-info",
+    "--bs-warning": "--theme-warning",
+    "--bs-danger": "--theme-danger",
+    "--bs-light": "--theme-light",
+    "--bs-dark": "--theme-dark",
+    "--bs-btn-color": "--theme-button-text",
+    "--bs-btn-bg": "--theme-button-bg",
+    "--bs-btn-border-color": "--theme-button-border",
+    "--bs-btn-hover-color": "--theme-button-hover-text",
+    "--bs-btn-hover-bg": "--theme-button-hover-bg",
+    "--bs-btn-hover-border-color": "--theme-button-hover-border",
+    "--bs-navbar-color": "--theme-navbar-text",
+    "--bs-navbar-hover-color": "--theme-navbar-hover-text",
+    "--bs-navbar-active-color": "--theme-navbar-active-text",
+    "--bs-navbar-brand-color": "--theme-navbar-brand-text"
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "name": "bootstrap-css-variables-transformer",
+  "version": "0.0.1",
+  "description": "A tool to transform Bootstrap CSS to use consistent CSS variables for theming",
+  "type": "module",
+  "main": "dist/lib/transformer.js",
+  "types": "dist/lib/transformer.d.ts",
+  "bin": {
+    "bootstrap-css-variables-transformer": "./dist/bin/cli.js",
+    "bootstrap-css-variables-transformer-extract": "./dist/bin/extract-variables.js"
+  },
+  "scripts": {
+    "start": "ts-node ./src/bin/cli.ts",
+    "build": "tsc",
+    "dev": "node scripts/dev-runner.js --input input/all.css --output output/all.css --config config/default-mapping.json",
+    "lint": "eslint . --ext .ts",
+    "lint:md": "markdownlint-cli2 \"**/*.md\" \"#node_modules\"",
+    "biome:check": "biome check",
+    "biome:fix": "biome check --write",
+    "test": "vitest run --reporter verbose",
+    "test:coverage": "vitest run --coverage",
+    "extract-variables": "node --loader ts-node/esm src/bin/extract-variables.ts",
+    "validate:css": "node scripts/validate-css.js"
+  },
+  "keywords": [
+    "bootstrap",
+    "css",
+    "variables",
+    "theming",
+    "lightningcss",
+    "transform"
+  ],
+  "author": "BrocksiNet",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "commander": "^11.1.0",
+    "fs-extra": "^11.1.1",
+    "lightningcss": "^1.21.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4",
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^20.10.3",
+    "@typescript-eslint/eslint-plugin": "^6.13.1",
+    "@typescript-eslint/parser": "^6.13.1",
+    "@vitest/coverage-v8": "^3.1.2",
+    "eslint": "^8.56.0",
+    "husky": "^9.1.7",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.3.2",
+    "vitest": "^3.1.1"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/lib/transformer.d.ts",
+      "import": "./dist/lib/transformer.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "package.json"
+  ],
+  "husky": {
+    "hooks": {
+      "pre-commit": "npx biome check && npm test"
+    }
+  }
+}

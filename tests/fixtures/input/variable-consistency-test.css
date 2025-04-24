@@ -1,0 +1,39 @@
+/* 
+ * Variable Consistency Test
+ * This file demonstrates the improved variable consistency feature
+ */
+
+:root {
+  --bs-light: #f9f9f9;
+  --bs-dark: #212529;
+  --bs-primary: #0d6efd;
+  --bs-secondary: #6c757d;
+}
+
+/* Components using hardcoded values that should be using variables */
+.light-panel {
+  background-color: #f9f9f9;
+  color: #212529;
+  border: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.primary-button {
+  background-color: #0d6efd;
+  color: white;
+  border-color: #0d6efd;
+}
+
+.secondary-button {
+  background-color: #6c757d;
+  color: white;
+  border-color: #6c757d;
+}
+
+/* Some components already using variables */
+.also-light-panel {
+  background-color: var(--bs-light);
+}
+
+.also-primary-button {
+  background-color: var(--bs-primary);
+}
