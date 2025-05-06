@@ -22,14 +22,7 @@
     "extract-variables": "node --loader ts-node/esm src/bin/extract-variables.ts",
     "validate:css": "node scripts/validate-css.js"
   },
-  "keywords": [
-    "bootstrap",
-    "css",
-    "variables",
-    "theming",
-    "lightningcss",
-    "transform"
-  ],
+  "keywords": ["bootstrap", "css", "variables", "theming", "lightningcss", "transform"],
   "author": "BrocksiNet",
   "license": "MIT",
   "dependencies": {
@@ -62,12 +55,7 @@
     },
     "./package.json": "./package.json"
   },
-  "files": [
-    "dist",
-    "README.md",
-    "LICENSE",
-    "package.json"
-  ],
+  "files": ["dist", "README.md", "LICENSE", "package.json"],
   "husky": {
     "hooks": {
       "pre-commit": "npx biome check && npm test"
