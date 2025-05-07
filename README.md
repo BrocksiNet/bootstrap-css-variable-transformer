@@ -1,4 +1,4 @@
-# Bootstrap CSS Variable Transformer
+# CSS Variable Transformer (Bootstrap)
 
 Transforms compiled Bootstrap CSS (or any CSS) to use CSS variables based on a JSON configuration file. This allows for easier theming and consistency, especially when working with frameworks or design systems that rely on CSS variables.
 
