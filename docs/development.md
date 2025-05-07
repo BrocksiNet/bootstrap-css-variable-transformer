@@ -112,6 +112,8 @@ If you are using an AI assistant that respects these files, please review the `.
 - Read version from `package.json` in CLI.
 - Improve AST transformation to handle literal value replacements and variable replacements within properties/functions, not just in declarations.
 - Add more comprehensive tests, especially for edge cases and the AST method.
+- Consider refactoring CLI (`cli.ts`) for automatic two-stage transformation (alias detection).
+- Investigate/resolve max resolution depth test discrepancy (`extract-variables.test.ts`).
 
 ## Detailed TODOs
 
@@ -142,6 +144,6 @@ If you are using an AI assistant that respects these files, please review the `.
   - [ ] Add more comprehensive test suite
 - [x] Add documentation and examples (Initial Version)
 - [ ] Create GitHub Actions workflow for CI/CD
-- [ ] Generate default mappings:
-  - [ ] Create tool to extract Bootstrap variables from CSS files (Consider if needed or use external tool)
-  - [ ] Add command for generating default-mapping.json file from Bootstrap CSS (Consider if needed)
+- [x] Generate default mappings: *(Functionality exists in `extract-variables.ts`)*
+  - [x] Create tool to extract Bootstrap variables from CSS files (Consider if needed or use external tool)
+  - [x] Add command for generating default-mapping.json file from Bootstrap CSS (Consider if needed)
