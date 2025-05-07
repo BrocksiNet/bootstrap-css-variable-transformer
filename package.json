@@ -1,13 +1,13 @@
 {
-  "name": "bootstrap-css-variables-transformer",
+  "name": "css-variables-transformer",
   "version": "0.0.1",
-  "description": "A tool to transform Bootstrap CSS to use consistent CSS variables for theming",
+  "description": "A tool to transform CSS using configurable mappings to manage CSS variables for theming",
   "type": "module",
   "main": "dist/lib/transformer.js",
   "types": "dist/lib/transformer.d.ts",
   "bin": {
-    "bootstrap-css-variables-transformer": "./dist/bin/cli.js",
-    "bootstrap-css-variables-transformer-extract": "./dist/bin/extract-variables.js"
+    "css-variables-transformer": "./dist/bin/cli.js",
+    "css-variables-extractor": "./dist/bin/extract-variables.js"
   },
   "scripts": {
     "start": "ts-node ./src/bin/cli.ts",

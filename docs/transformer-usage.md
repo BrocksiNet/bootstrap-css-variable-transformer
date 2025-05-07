@@ -1,17 +1,17 @@
 # Transformer Tool Usage
 
-This document provides detailed information on using the `bootstrap-css-variables-transformer` command-line tool.
+This document provides detailed information on using the `css-variables-transformer` command-line tool.
 
 ## CLI Command
 
 ```bash
-npx bootstrap-css-variables-transformer -i input.css -o output.css -c config.json [--overrides overrides.json] [-m ast|regex]
+npx css-variables-transformer -i input.css -o output.css -c config.json [--overrides overrides.json] [-m ast|regex]
 ```
 
 Or if installed globally/locally:
 
 ```bash
-bootstrap-css-variables-transformer -i path/to/bootstrap.css -o path/to/themed-bootstrap.css -c path/to/theme-mapping.json
+css-variables-transformer -i path/to/source.css -o path/to/themed.css -c path/to/theme-mapping.json
 ```
 
 ### Options
@@ -33,7 +33,7 @@ The tool merges these two configurations. If a key (the value or variable to fin
 
 **Structure:**
 
-Each configuration file should be a JSON object where keys are the literal values (e.g., hex codes like `#0d6efd`) or existing variable names (e.g., `--bs-primary`) to find in the input CSS, and values are the corresponding theme variable names (e.g., `--theme-primary`) to replace them with.
+Each configuration file should be a JSON object where keys are the literal values (e.g., hex codes like `#0d6efd`) or existing variable names (e.g., `--original-var`) to find in the input CSS, and values are the corresponding theme variable names (e.g., `--theme-primary`) to replace them with.
 
 **Example Base (`theme-mapping.json`):**
 
@@ -42,13 +42,13 @@ Each configuration file should be a JSON object where keys are the literal value
   // Map specific color values to theme variables
   "#0d6efd": "--theme-primary",
   "#6c757d": "--theme-secondary",
-  "#198754": "--theme-success", // Maps the color green to --theme-success
+  "#198754": "--theme-success",
 
-  // Map specific Bootstrap variables to theme variables
-  "--bs-primary": "--theme-primary", // Ensures --bs-primary also maps to --theme-primary
-  "--bs-secondary": "--theme-secondary",
-  "--bs-success": "--theme-success",
-  "--bs-body-color": "--theme-text-default"
+  // Map specific source variables to theme variables
+  "--source-primary": "--theme-primary",
+  "--source-secondary": "--theme-secondary",
+  "--source-success": "--theme-success",
+  "--source-body-color": "--theme-text-default"
 }
 ```
 
@@ -57,49 +57,51 @@ Each configuration file should be a JSON object where keys are the literal value
 ```json
 {
   // Override the primary color specifically for buttons
-  "--bs-btn-bg": "--theme-button-primary-bg",
-  "--bs-btn-color": "--theme-button-primary-text",
+  "--source-btn-bg": "--theme-button-primary-bg",
+  "--source-btn-color": "--theme-button-primary-text",
   // Override the default text color globally
-  "--bs-body-color": "--theme-text-override"
+  "--source-body-color": "--theme-text-override"
 }
 ```
 
-When running with `-c theme-mapping.json --overrides theme-overrides.json`, the final effective mapping for `--bs-btn-bg` would be `--theme-button-primary-bg`, and for `--bs-body-color` it would be `--theme-text-override`. Other mappings from `theme-mapping.json` would remain unchanged.
+When running with `-c theme-mapping.json --overrides theme-overrides.json`, the final effective mapping for `--source-btn-bg` would be `--theme-button-primary-bg`, and for `--source-body-color` it would be `--theme-text-override`. Other mappings from `theme-mapping.json` would remain unchanged.
 
-_Note: For details on the automatically generated mapping files (`default-mapping.json` and `default-mapping-var-aliases.json`), see the [Mapping Generation](./mapping-generation.md) documentation._
+_Note: For details on the automatically generated mapping files (e.g., `default-mapping.json` and `default-mapping-var-aliases.json` produced by the extractor script), see the [Mapping Generation](./mapping-generation.md) documentation._
 
 ## Advanced Usage: Two-Step Transformation for Aliases and Theming
 
-The [`extract-variables.ts` script](./mapping-generation.md) generates two main types of mapping files: one with raw resolved values (e.g., `default-mapping.json`) and another with variable aliases (e.g., `default-mapping-var-aliases.json`). The aliases file is particularly useful for resolving Bootstrap's internal variable structure before applying your custom theme.
+The [`css-variables-extractor` script](./mapping-generation.md) generates two main types of mapping files: one with raw resolved values (e.g., `default-mapping.json`) and another with variable aliases (e.g., `default-mapping-var-aliases.json`). The aliases file is particularly useful for resolving a library's internal variable structure before applying your custom theme.
 
-To leverage this, you can use a two-step transformation process with the `bootstrap-css-variables-transformer` CLI:
+To leverage this, you can use a two-step transformation process with the `css-variables-transformer` CLI:
 
-### Step 1: Resolve Internal Bootstrap Aliases
+### Step 1: Resolve Internal Library Aliases
 
-This step takes your original CSS and the `*-var-aliases.json` file to produce an intermediate CSS where Bootstrap's internal variable references are normalized.
+This step takes your original CSS and the `*-var-aliases.json` file to produce an intermediate CSS where the library's internal variable references are normalized.
 
 ```bash
-node dist/bin/cli.js -i input.css -o intermediate.css -c your-bootstrap-var-aliases.json
+css-variables-transformer -i input.css -o intermediate.css -c your-library-var-aliases.json
+# Or using node directly if preferred for the config structure:
+# node dist/bin/cli.js -i input.css -o intermediate.css -c your-library-var-aliases.json
 ```
 
-- `-i input.css`: Your source CSS file (e.g., compiled Bootstrap).
+- `-i input.css`: Your source CSS file (e.g., compiled library CSS).
 - `-o intermediate.css`: An intermediate output file.
-- `-c your-bootstrap-var-aliases.json`: The variable alias file generated by `extract-variables.ts` (e.g., `config/default-mapping-var-aliases.json`). The transformer will primarily use the `variableAliases` key from this file for this step.
+- `-c your-library-var-aliases.json`: The variable alias file generated by `css-variables-extractor` (e.g., `config/default-mapping-var-aliases.json`). The transformer will primarily use the `variableAliases` key from this file for this step.
 
 ### Step 2: Apply Your Custom Theme Map
 
 This step takes the `intermediate.css` (output from Step 1) and your main theme mapping file to produce the final themed CSS.
 
 ```bash
-node dist/bin/cli.js -i intermediate.css -o final-output.css -c your-theme-map.json [--overrides your-theme-overrides.json]
+css-variables-transformer -i intermediate.css -o final-output.css -c your-theme-map.json [--overrides your-theme-overrides.json]
 ```
 
 - `-i intermediate.css`: The CSS file from Step 1.
 - `-o final-output.css`: Your final themed CSS output.
-- `-c your-theme-map.json`: Your primary configuration file that maps Bootstrap variables (or their raw values after alias resolution) to your theme's CSS variables.
+- `-c your-theme-map.json`: Your primary configuration file that maps source variables (or their raw values after alias resolution) to your theme's CSS variables.
 - `--overrides your-theme-overrides.json` (Optional): Any specific overrides for your theme mapping.
 
-This two-step approach allows you to first align the input CSS with Bootstrap's intended variable structure using the alias file, and then apply your specific theming transformations.
+This two-step approach allows you to first align the input CSS with the source library's intended variable structure using the alias file, and then apply your specific theming transformations.
 
 ## Generated Variables File (`<output-name>.vars.css`)
 

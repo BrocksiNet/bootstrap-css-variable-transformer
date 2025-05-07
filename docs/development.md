@@ -1,14 +1,14 @@
 # Development Guide
 
-This guide provides information for developers working on or contributing to the `bootstrap-css-variables-transformer` project.
+This guide provides information for developers working on or contributing to the `css-variables-transformer` project.
 
 ## Setup
 
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/YourUsername/bootstrap-css-variables-transformer.git
-   cd bootstrap-css-variables-transformer
+   git clone https://github.com/YourUsername/css-variables-transformer.git
+   cd css-variables-transformer
    ```
 
 2. Install dependencies:
@@ -55,6 +55,8 @@ This guide provides information for developers working on or contributing to the
 
   ```bash
   node dist/bin/cli.js --help
+  # For the extractor:
+  # node dist/bin/extract-variables.js --help
   ```
 
 ## Project Structure
@@ -62,11 +64,11 @@ This guide provides information for developers working on or contributing to the
 The project follows this structure:
 
 ```shell
-bootstrap-css-variables-transformer/
+css-variables-transformer/
 ├── src/
 │   ├── bin/
-│   │   ├── cli.ts               # Main CLI entry point
-│   │   └── extract-variables.ts # Script to extract vars
+│   │   ├── cli.ts               # Main CLI entry point for css-variables-transformer
+│   │   └── extract-variables.ts # Script for css-variables-extractor
 │   ├── lib/
 │   │   ├── transformer.ts       # Main transformation logic (AST & Regex)
 │   │   └── mapping-loader.ts    # Loads and processes mapping files
@@ -123,17 +125,17 @@ If you are using an AI assistant that respects these files, please review the `.
 - [x] Build transformer functionality
   - Regex-based implementation:
     - [x] Process literal value replacements (e.g., #fff -> var(--theme-color))
-    - [x] Process variable references (e.g., var(--bs-color) -> var(--theme-color))
-    - [x] Process variable declarations (e.g., --bs-color: #fff -> --bs-color: var(--theme-color))
+    - [x] Process variable references (e.g., var(--source-color) -> var(--theme-color))
+    - [x] Process variable declarations (e.g., --source-color: #fff -> --source-color: var(--theme-color))
   - AST-based implementation:
     - [x] Create visitor for CSS custom property (DashedIdent) transformation
     - [x] Add visitor for variable references (var() functions)
     - [ ] Add visitor for color values in properties
     - [ ] Handle other property types (lengths, gradients, etc.)
 - [ ] Improve variable consistency:
-  - [x] Detect defined Bootstrap variables and their values (regex implementation)
+  - [x] Detect defined source variables and their values (regex implementation)
   - [x] Match hardcoded values to potential variable equivalents (regex implementation)
-  - [x] Replace hardcoded values with references to appropriate Bootstrap variables (regex implementation)
+  - [x] Replace hardcoded values with references to appropriate source variables (regex implementation)
   - [ ] Implement variable consistency in AST transformation
 - [x] Support for basic inheritance and overriding configurations
 - [x] Implement file I/O handling
@@ -144,6 +146,6 @@ If you are using an AI assistant that respects these files, please review the `.
   - [ ] Add more comprehensive test suite
 - [x] Add documentation and examples (Initial Version)
 - [ ] Create GitHub Actions workflow for CI/CD
-- [x] Generate default mappings: *(Functionality exists in `extract-variables.ts`)*
-  - [x] Create tool to extract Bootstrap variables from CSS files (Consider if needed or use external tool)
-  - [x] Add command for generating default-mapping.json file from Bootstrap CSS (Consider if needed)
+- [x] Generate default mappings: _(Functionality exists in `extract-variables.ts`)_
+  - [x] Create tool to extract source variables from CSS files
+  - [x] Add command for generating default-mapping.json file from source CSS
