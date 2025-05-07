@@ -4,11 +4,16 @@
     "--bs-primary": "--theme-primary",
     "#0d6efd": "--theme-primary",
     "--bs-secondary": "--theme-secondary",
-    "#212529": "--theme-text"
+    "--bs-body-color": "--theme-text",
+    "#212529": "--theme-text",
+    "--bs-body-bg": "--theme-background-global",
+    "#fff": "--theme-background-global",
+    "--bs-explicit-var-ref": "var(--theme-explicit-ref)"
   },
   "overrides": {
     "--bs-btn-color": "--theme-button-text",
     "--bs-btn-bg": "--theme-button-bg",
-    "--bs-alert-color": "--theme-alert-text"
+    "--bs-alert-color": "--theme-alert-text",
+    "--bs-override-explicit-var": "var(--theme-override-explicit)"
   }
 }

@@ -1,0 +1,7 @@
+{
+  "variableAliases": {
+    "--bs-component-text": "var(--bs-body-color)",
+    "--bs-another-component-bg": "var(--bs-body-bg)",
+    "--bs-header-color": "var(--bs-primary)"
+  }
+}

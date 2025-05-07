@@ -38,7 +38,7 @@ Here is a description of the code:
 
 ```javascript
 function example() {
-    return true;
+  return true;
 }
 ```
 

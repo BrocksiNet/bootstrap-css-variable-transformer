@@ -580,4 +580,179 @@ describe("CSS Transformer", () => {
 
     // All advanced tests implemented
   });
+
+  describe("Tests for Explicit 'var()' in Mapping Config", () => {
+    it("REGEX: should use explicit 'var()' from defaultMapping for declarations", () => {
+      const inputCss = ":root { --bs-explicit-var-ref: #123456; }";
+      const { css: result } = transformer.transformCss(
+        inputCss,
+        testConfig, // Uses the updated test-config.json
+        transformer.TransformMethod.REGEX,
+      );
+      expect(result).toContain("--bs-explicit-var-ref: var(--theme-explicit-ref);");
+    });
+
+    it("REGEX: should use explicit 'var()' from defaultMapping for usages", () => {
+      const inputCss = ".my-class { color: var(--bs-explicit-var-ref); }";
+      const { css: result } = transformer.transformCss(
+        inputCss,
+        testConfig,
+        transformer.TransformMethod.REGEX,
+      );
+      expect(result).toContain("color: var(--theme-explicit-ref);");
+    });
+
+    it("REGEX: should use explicit 'var()' from overrides for declarations", () => {
+      const inputCss = ":root { --bs-override-explicit-var: #abcdef; }";
+      const { css: result } = transformer.transformCss(
+        inputCss,
+        testConfig,
+        transformer.TransformMethod.REGEX,
+      );
+      expect(result).toContain("--bs-override-explicit-var: var(--theme-override-explicit);");
+    });
+
+    it("REGEX: should use explicit 'var()' from overrides for usages", () => {
+      const inputCss = ".another-class { border-color: var(--bs-override-explicit-var); }";
+      const { css: result } = transformer.transformCss(
+        inputCss,
+        testConfig,
+        transformer.TransformMethod.REGEX,
+      );
+      expect(result).toContain("border-color: var(--theme-override-explicit);");
+    });
+
+    it("AST: should use explicit 'var()' from defaultMapping for declarations", () => {
+      const inputCss = ":root { --bs-explicit-var-ref: #123456; }";
+      const { css: result } = transformer.transformCss(
+        inputCss,
+        testConfig,
+        transformer.TransformMethod.AST,
+      );
+      expect(result).toContain("--bs-explicit-var-ref: var(--theme-explicit-ref);");
+    });
+
+    it("AST: should use explicit 'var()' from overrides for declarations", () => {
+      const inputCss = ":root { --bs-override-explicit-var: #abcdef; }";
+      const { css: result } = transformer.transformCss(
+        inputCss,
+        testConfig,
+        transformer.TransformMethod.AST,
+      );
+      expect(result).toContain("--bs-override-explicit-var: var(--theme-override-explicit);");
+    });
+
+    // Note: AST method primarily transforms declarations. Literal value replacements and var usages
+    // in rule properties are not its current focus, so we don't add specific AST tests for those
+    // regarding explicit var() in config for usages.
+  });
+
+  describe("Multi-Stage Transformation (Bootstrap Aliases then Theme Mapping)", () => {
+    let bootstrapAliasConfig: MappingConfig;
+    let themeMappingConfig: MappingConfig; // This will be the existing testConfig
+
+    beforeEach(() => {
+      // Load Bootstrap alias configuration
+      const aliasFixturePath = path.join(__dirname, "../fixtures/test-bootstrap-aliases.json");
+      const aliasConfigFile = fs.readFileSync(aliasFixturePath, "utf-8");
+      const rawAliasConfig = JSON.parse(aliasConfigFile);
+      bootstrapAliasConfig = {
+        defaultMapping: rawAliasConfig.variableAliases || {},
+        overrides: {},
+      };
+
+      // themeMappingConfig will use the existing testConfig loaded in the outer beforeEach
+      // which now includes the mapping for #fff.
+      // For clarity, we re-assign it from the 'testConfig' variable available in this scope.
+      themeMappingConfig = testConfig;
+    });
+
+    it("should correctly transform CSS through two stages: alias resolution then theming", () => {
+      const inputCss = `
+        :root {
+          --bs-component-text: #initial1; /* Will become var(--bs-body-color), then var(--theme-text) */
+          --bs-another-component-bg: #initial2; /* Will become var(--bs-body-bg), then var(--theme-background-global) */
+          --bs-header-color: #initial3; /* Will become var(--bs-primary), then var(--theme-primary) */
+        }
+        .rule1 {
+          color: var(--bs-component-text);
+          background-color: var(--bs-another-component-bg);
+        }
+        .rule2 {
+          border-color: var(--bs-header-color);
+        }
+      `;
+
+      // Stage 1: Resolve internal Bootstrap aliases using REGEX
+      const { css: stage1CssRegex } = transformer.transformCss(
+        inputCss,
+        bootstrapAliasConfig,
+        transformer.TransformMethod.REGEX,
+      );
+
+      // Assertions for Stage 1 (Regex)
+      expect(stage1CssRegex).toContain("--bs-component-text: var(--bs-body-color);");
+      expect(stage1CssRegex).toContain("--bs-another-component-bg: var(--bs-body-bg);");
+      expect(stage1CssRegex).toContain("--bs-header-color: var(--bs-primary);");
+      expect(stage1CssRegex).toContain("color: var(--bs-body-color);");
+      expect(stage1CssRegex).toContain("background-color: var(--bs-body-bg);");
+      expect(stage1CssRegex).toContain("border-color: var(--bs-primary);");
+
+      // Stage 2: Map canonical Bootstrap variables/values to theme variables using REGEX
+      const { css: finalCssRegex } = transformer.transformCss(
+        stage1CssRegex,
+        themeMappingConfig, // themeMappingConfig already has #212529 -> --theme-text, #fff -> --theme-background-global, --bs-primary -> --theme-primary
+        transformer.TransformMethod.REGEX,
+      );
+
+      // Assertions for Stage 2 (Regex) - Final output
+      // With direct mappings for --bs-body-color, --bs-body-bg, and --bs-primary in themeMappingConfig,
+      // REGEX method should now fully transform declarations and usages.
+      expect(finalCssRegex).toContain("--bs-component-text: var(--theme-text);");
+      expect(finalCssRegex).toContain("--bs-another-component-bg: var(--theme-background-global);");
+      expect(finalCssRegex).toContain("--bs-header-color: var(--theme-primary);");
+      expect(finalCssRegex).toContain("color: var(--theme-text);");
+      expect(finalCssRegex).toContain("background-color: var(--theme-background-global);");
+      expect(finalCssRegex).toContain("border-color: var(--theme-primary);"); // Correctly transformed as --bs-primary is mapped
+
+
+      // Stage 1: Resolve internal Bootstrap aliases using AST (declarations only)
+      const { css: stage1CssAst } = transformer.transformCss(
+        inputCss, // Original CSS
+        bootstrapAliasConfig,
+        transformer.TransformMethod.AST,
+      );
+
+      // Assertions for Stage 1 (AST) - Declarations only
+      expect(stage1CssAst).toContain("--bs-component-text: var(--bs-body-color)");
+      expect(stage1CssAst).toContain("--bs-another-component-bg: var(--bs-body-bg)");
+      expect(stage1CssAst).toContain("--bs-header-color: var(--bs-primary)");
+      // Usages remain unchanged in Stage 1 for AST
+      expect(stage1CssAst).toContain("color: var(--bs-component-text)");
+      expect(stage1CssAst).toContain("background-color: var(--bs-another-component-bg)");
+
+
+      // Stage 2: Map canonical Bootstrap variables/values to theme variables using AST
+      const { css: finalCssAst } = transformer.transformCss(
+        stage1CssAst,
+        themeMappingConfig,
+        transformer.TransformMethod.AST,
+      );
+
+      // Assertions for Stage 2 (AST) - Final output
+      // Declarations from stage1CssAst get re-evaluated.
+      // --bs-component-text is not in themeMappingConfig, so its declaration remains as is from stage1CssAst.
+      // Same for --bs-another-component-bg and --bs-header-color.
+      expect(finalCssAst).toContain("--bs-component-text: var(--bs-body-color);");
+      expect(finalCssAst).toContain("--bs-another-component-bg: var(--bs-body-bg);");
+      expect(finalCssAst).toContain("--bs-header-color: var(--bs-primary);");
+
+      // Usages in AST: Stage 1 AST leaves usages like var(--bs-component-text) unchanged.
+      // Stage 2 AST's PropertyValue visitor encounters var(--bs-component-text).
+      // Since --bs-component-text is NOT in themeMappingConfig, this usage also remains unchanged.
+      expect(finalCssAst).toContain("color: var(--bs-component-text);");
+      expect(finalCssAst).toContain("background-color: var(--bs-another-component-bg);");
+      expect(finalCssAst).toContain("border-color: var(--bs-header-color);");
+    });
+  });
 });

@@ -5,9 +5,11 @@ This directory contains test fixtures for the Bootstrap CSS Variables Transforme
 ## Structure
 
 - `input/` - Source CSS files for testing
+
   - `variable-consistency-test.css` - Test for variable consistency feature
 
 - `expected/` - Expected output files for different transformation methods
+
   - `variable-consistency-ast.css` - Expected output using AST transformation
   - `variable-consistency-regex.css` - Expected output using regex transformation
 
