@@ -4,11 +4,28 @@ The project includes a script (`src/bin/extract-variables.ts`, exposed as `css-v
 
 ## Usage
 
-```bash
-css-variables-extractor -i path/to/source.css -o path/to/default-mapping.json
-# Or using node directly:
-# node dist/bin/extract-variables.js -i path/to/source.css -o path/to/default-mapping.json
-```
+There are several ways to run the `css-variables-extractor` script:
+
+1. **Using `npx` (recommended for local project usage):**
+    If you've installed `css-variables-transformer` as a local project dependency:
+
+    ```bash
+    npx css-variables-extractor -i path/to/source.css -o path/to/default-mapping.json
+    ```
+
+2. **Directly (if installed globally):**
+    If you've installed `css-variables-transformer` globally (`npm install -g css-variables-transformer`):
+
+    ```bash
+    css-variables-extractor -i path/to/source.css -o path/to/default-mapping.json
+    ```
+
+3. **Via Node.js (e.g., for development):**
+    You can also execute the script directly with Node:
+
+    ```bash
+    node dist/bin/extract-variables.js -i path/to/source.css -o path/to/default-mapping.json
+    ```
 
 ### Options
 
